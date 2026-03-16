@@ -28,10 +28,6 @@ try {
       must_change_password TINYINT(1) NOT NULL DEFAULT 1,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-
-    // Add column to existing tables that may not have it yet
-    $pdo->exec("ALTER TABLE Utilisateur ADD COLUMN IF NOT EXISTS must_change_password TINYINT(1) NOT NULL DEFAULT 1");
-
     $pdo->exec("CREATE TABLE IF NOT EXISTS Notes (
       id INT PRIMARY KEY AUTO_INCREMENT,
       etudiant_id INT NOT NULL,
@@ -41,7 +37,19 @@ try {
       date_saisie DATE NULL DEFAULT NULL,
       FOREIGN KEY (etudiant_id) REFERENCES Utilisateur(id) ON DELETE CASCADE
     )");
+} catch (\PDOException $e) {
+    // Tables may already exist — continue
+}
 
+// Add column to existing tables; fails silently if already present
+try {
+    $pdo->exec("ALTER TABLE Utilisateur ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 1");
+} catch (\PDOException $e) {
+    // Duplicate column — already exists, ignore
+}
+
+// Seed default users
+try {
     $pdo->exec("INSERT IGNORE INTO Utilisateur (nom, prenom, mail, password_hash, role) VALUES
     ('Dupont', 'Jean', 'jean.dupont@esicad.fr', SHA2('motdepasse123', 256), 'etudiant'),
     ('Martin', 'Sophie', 'sophie.martin@esicad.fr', SHA2('motdepasse123', 256), 'prof'),
@@ -59,9 +67,14 @@ try {
     ('LACHEVRE', 'Corran', 'corran.lachevre@my-digital-school.org', SHA2('motdepasse123', 256), 'etudiant'),
     ('SOULIER', 'Rémi', 'remi.soulier@my-digital-school.org', SHA2('motdepasse123', 256), 'etudiant'),
     ('LAPORTE', 'Enzo', 'enzo.laporte@my-digital-school.org', SHA2('motdepasse123', 256), 'etudiant')");
-    // Admin never needs to change password
+} catch (\PDOException $e) {
+    // Seed failed — continue
+}
+
+// Admin never needs to change password
+try {
     $pdo->exec("UPDATE Utilisateur SET must_change_password = 0 WHERE mail = 'admin@esicad.fr'");
 } catch (\PDOException $e) {
-    // Tables may already exist or init failed — continue
+    // continue
 }
 ?>

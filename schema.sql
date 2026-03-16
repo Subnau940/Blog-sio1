@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
   mail VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin', 'prof', 'etudiant') NOT NULL DEFAULT 'etudiant',
+  must_change_password TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
