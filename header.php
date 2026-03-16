@@ -18,6 +18,7 @@
             <?php if (userRole() === 'admin'): ?>
                 <a href="admin.php" class="headerButton">Admin</a>
             <?php endif; ?>
+            <a href="change-password.php" class="headerButton">Mot de passe</a>
             <a href="logout.php" class="headerButton">Déconnexion</a>
         <?php else: ?>
             <a href="login.php" class="headerButton">Connexion</a>
