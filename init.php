@@ -14,7 +14,10 @@ try {
       must_change_password TINYINT(1) NOT NULL DEFAULT 1,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
-    $pdo->exec("ALTER TABLE Utilisateur ADD COLUMN IF NOT EXISTS must_change_password TINYINT(1) NOT NULL DEFAULT 1");
+    $col = $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Utilisateur' AND COLUMN_NAME = 'must_change_password'")->fetchColumn();
+    if (!$col) {
+        $pdo->exec("ALTER TABLE Utilisateur ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 1");
+    }
     echo "✅ Table Utilisateur OK<br>";
 } catch (\PDOException $e) {
     $errors[] = "Utilisateur: " . $e->getMessage();
