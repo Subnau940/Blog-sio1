@@ -59,6 +59,9 @@ try {
     ('SOULIER',        'Rémi',      'remi.soulier@my-digital-school.org',         SHA2('changeme', 256),     'etudiant', 1),
     ('LAPORTE',        'Enzo',      'enzo.laporte@my-digital-school.org',         SHA2('changeme', 256),     'etudiant', 1)");
     $pdo->exec("UPDATE Utilisateur SET must_change_password = 0 WHERE mail IN ('admin@esicad.fr', 'sophie.martin@esicad.fr')");
+    // Force-update password hashes (INSERT IGNORE does not overwrite existing rows)
+    $pdo->exec("UPDATE Utilisateur SET password_hash = SHA2('motdepasse123', 256) WHERE mail = 'sophie.martin@esicad.fr'");
+    $pdo->exec("UPDATE Utilisateur SET password_hash = SHA2('changeme', 256), must_change_password = 1 WHERE role = 'etudiant'");
     echo "✅ Utilisateurs insérés OK<br>";
 } catch (\PDOException $e) {
     $errors[] = "Insert users: " . $e->getMessage();
